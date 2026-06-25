@@ -1,16 +1,20 @@
 # DisplaySnooze
 
-DisplaySnooze is a tiny open-source Windows utility that turns your displays off while leaving the PC awake and your current Windows session alone.
+DisplaySnooze is a tiny open-source utility that turns your displays off while leaving the PC awake and your current session alone.
 
 ## Why
 
 I like to keep my PC on, and I do not usually log out because it is just me in my home. At night, I just wanted an easy way to turn my screens off so the room is not lit up while I am trying to sleep.
 
-Windows can turn monitors off, but sometimes a short-lived wake event turns them right back on. DisplaySnooze handles that by turning the displays off immediately, then repeating the same monitor-off command for a short guard window.
+Windows and Linux can turn monitors off, but sometimes a short-lived wake event turns them right back on. DisplaySnooze handles that by turning the displays off immediately, then repeating the same monitor-off command for a short guard window.
 
 ## What It Does
 
-DisplaySnooze sends the standard Windows monitor power command:
+On Windows, DisplaySnooze is a real `.exe`. The PowerShell files in this repo are only build/signing helpers.
+
+On Linux, DisplaySnooze is a small Bash command that tries the display-off command for your current desktop session.
+
+The Windows version sends the standard Windows monitor power command:
 
 ```text
 WM_SYSCOMMAND / SC_MONITORPOWER / 2
@@ -28,7 +32,7 @@ By default, it:
 - Does not add itself to startup.
 - Does not use the network.
 
-## Usage
+## Windows Usage
 
 Double-click `DisplaySnooze.exe`, or run it from PowerShell:
 
@@ -52,13 +56,58 @@ Examples:
 `guard-seconds` defaults to `180` and is clamped between `15` and `1800`.
 `interval-seconds` defaults to `4` and is clamped between `1` and `60`.
 
-## Build
+## Linux Usage
+
+Run the portable Linux command:
+
+```bash
+./linux/displaysnooze
+```
+
+Optional arguments match the Windows EXE:
+
+```bash
+./linux/displaysnooze <guard-seconds> <interval-seconds>
+```
+
+Examples:
+
+```bash
+./linux/displaysnooze 300
+./linux/displaysnooze 300 5
+```
+
+Supported Linux backends:
+
+- X11: `xset dpms force off`
+- Sway/wlroots: `swaymsg 'output * power off'`, with a DPMS fallback
+- Hyprland: `hyprctl dispatch dpms off`
+- KDE Plasma Wayland: `kscreen-doctor --dpms off`
+
+Linux support depends on the desktop/compositor, not just the distro. Arch, Debian, Fedora, Ubuntu, openSUSE, and most other distros can use the portable script as long as the matching backend tool is installed.
+
+## Windows Build
 
 ```powershell
 .\Build.ps1
 ```
 
 The build script uses the .NET Framework C# compiler included with Windows.
+
+## Linux Package Build
+
+```bash
+chmod +x linux/displaysnooze packaging/linux/build-linux-packages.sh
+packaging/linux/build-linux-packages.sh
+```
+
+The Linux package build writes:
+
+- `dist/linux/displaysnooze-<version>-linux-portable.tar.gz`
+- `dist/linux/displaysnooze_<version>_all.deb`
+- `dist/linux/displaysnooze-<version>-*.rpm`
+
+Arch users can use the PKGBUILD in `packaging/arch/PKGBUILD`.
 
 ## Signing
 
