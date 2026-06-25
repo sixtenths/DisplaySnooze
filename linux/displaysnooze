@@ -84,7 +84,10 @@ try_kde() {
 
     if printf '%s' "${XDG_CURRENT_DESKTOP:-} ${DESKTOP_SESSION:-}" | grep -Eqi 'kde|plasma'; then
         timeout 2s kscreen-doctor --dpms off >/dev/null 2>&1
-        return $?
+        case "$?" in
+            0|124) return 0 ;;
+            *) return 1 ;;
+        esac
     fi
 
     return 1
