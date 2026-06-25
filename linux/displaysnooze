@@ -1,0 +1,139 @@
+#!/usr/bin/env bash
+set -u
+
+APP_NAME="DisplaySnooze"
+
+usage() {
+    cat <<'USAGE'
+DisplaySnooze for Linux
+
+Usage:
+  displaysnooze [guard-seconds] [interval-seconds]
+
+Defaults:
+  guard-seconds    180  (clamped 15..1800)
+  interval-seconds 4    (clamped 1..60)
+
+This turns displays off while leaving the session and PC awake. It does not
+lock, log out, suspend, hibernate, install a service, or change startup config.
+USAGE
+}
+
+is_int() {
+    case "$1" in
+        ''|*[!0-9]*) return 1 ;;
+        *) return 0 ;;
+    esac
+}
+
+read_int_arg() {
+    local value="$1"
+    local default="$2"
+    local min="$3"
+    local max="$4"
+
+    if ! is_int "$value"; then
+        value="$default"
+    fi
+
+    if [ "$value" -lt "$min" ]; then
+        value="$min"
+    elif [ "$value" -gt "$max" ]; then
+        value="$max"
+    fi
+
+    printf '%s\n' "$value"
+}
+
+have() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+try_x11() {
+    [ -n "${DISPLAY:-}" ] || return 1
+    have xset || return 1
+
+    xset dpms force off >/dev/null 2>&1
+}
+
+try_sway() {
+    have swaymsg || return 1
+
+    if [ -n "${SWAYSOCK:-}" ] || printf '%s' "${XDG_CURRENT_DESKTOP:-}" | grep -qi 'sway'; then
+        swaymsg 'output * power off' >/dev/null 2>&1 ||
+            swaymsg 'output * dpms off' >/dev/null 2>&1
+        return $?
+    fi
+
+    return 1
+}
+
+try_hyprland() {
+    have hyprctl || return 1
+
+    if [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ] || printf '%s' "${XDG_CURRENT_DESKTOP:-}" | grep -qi 'hyprland'; then
+        hyprctl dispatch dpms off >/dev/null 2>&1
+        return $?
+    fi
+
+    return 1
+}
+
+try_kde() {
+    have kscreen-doctor || return 1
+
+    if printf '%s' "${XDG_CURRENT_DESKTOP:-} ${DESKTOP_SESSION:-}" | grep -Eqi 'kde|plasma'; then
+        timeout 2s kscreen-doctor --dpms off >/dev/null 2>&1
+        return $?
+    fi
+
+    return 1
+}
+
+turn_displays_off() {
+    try_x11 && return 0
+    try_sway && return 0
+    try_hyprland && return 0
+    try_kde && return 0
+
+    return 1
+}
+
+main() {
+    case "${1:-}" in
+        -h|--help)
+            usage
+            return 0
+            ;;
+    esac
+
+    local guard_seconds interval_seconds stop_at now remaining sleep_for
+    guard_seconds="$(read_int_arg "${1:-}" 180 15 1800)"
+    interval_seconds="$(read_int_arg "${2:-}" 4 1 60)"
+    stop_at=$(( $(date +%s) + guard_seconds ))
+
+    while :; do
+        if ! turn_displays_off; then
+            cat >&2 <<'ERROR'
+DisplaySnooze could not find a supported Linux display-off command.
+
+Supported backends:
+  X11:          xset dpms force off
+  Sway:         swaymsg 'output * power off' or dpms off
+  Hyprland:     hyprctl dispatch dpms off
+  KDE Plasma:   kscreen-doctor --dpms off
+ERROR
+            return 1
+        fi
+
+        now="$(date +%s)"
+        remaining=$(( stop_at - now ))
+        [ "$remaining" -le 0 ] && break
+
+        sleep_for="$interval_seconds"
+        [ "$remaining" -lt "$sleep_for" ] && sleep_for="$remaining"
+        sleep "$sleep_for"
+    done
+}
+
+main "$@"
