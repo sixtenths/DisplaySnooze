@@ -1,0 +1,25 @@
+# Maintainer: Zac <zdksmith@yahoo.com>
+pkgname=displaysnooze
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Turn displays off while leaving the Linux session awake"
+arch=('any')
+url="https://github.com/InternalAardvark/DisplaySnooze"
+license=('MIT')
+depends=('bash')
+optdepends=(
+  'xorg-xset: X11 display power support'
+  'sway: Sway/wlroots Wayland support'
+  'hyprland: Hyprland Wayland support'
+  'kscreen: KDE Plasma Wayland support'
+)
+source=(
+  "displaysnooze::https://raw.githubusercontent.com/InternalAardvark/DisplaySnooze/main/linux/displaysnooze"
+  "LICENSE::https://raw.githubusercontent.com/InternalAardvark/DisplaySnooze/main/LICENSE"
+)
+sha256sums=('SKIP' 'SKIP')
+
+package() {
+  install -Dm755 "$srcdir/displaysnooze" "$pkgdir/usr/bin/displaysnooze"
+  install -Dm644 "$srcdir/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}
