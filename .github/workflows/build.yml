@@ -7,6 +7,9 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   windows:
     name: Windows EXE
@@ -56,3 +59,53 @@ jobs:
         with:
           name: DisplaySnooze-linux
           path: dist/linux/*
+
+  release:
+    name: Publish Release
+    runs-on: ubuntu-latest
+    needs:
+      - windows
+      - linux
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+
+      - name: Prepare release files
+        run: |
+          set -euo pipefail
+          mkdir -p release
+          find release-artifacts -maxdepth 3 -type f -print -exec cp {} release/ \;
+          ls -la release
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag="v0.1.0"
+          title="DisplaySnooze 0.1.0"
+          notes="$(cat <<'NOTES'
+Download DisplaySnooze here if you just want the built files.
+
+Windows:
+- DisplaySnooze.exe
+- DisplaySnoozeLocalCodeSigning.cer
+
+Linux:
+- portable tar.gz
+- Debian/Ubuntu .deb
+- Fedora/RPM .rpm
+
+The Windows EXE is signed with a local self-signed certificate, so Windows may still show it as an unknown publisher unless you trust that certificate.
+NOTES
+)"
+
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release edit "$tag" --title "$title" --notes "$notes"
+            gh release upload "$tag" release/* --clobber
+          else
+            gh release create "$tag" release/* --title "$title" --notes "$notes"
+          fi
