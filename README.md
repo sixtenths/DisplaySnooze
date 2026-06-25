@@ -32,6 +32,17 @@ By default, it:
 - Does not add itself to startup.
 - Does not use the network.
 
+## Download
+
+Grab the latest built files from the [GitHub Releases page](https://github.com/InternalAardvark/DisplaySnooze/releases/latest).
+
+Lazy path:
+
+- Windows: download `DisplaySnooze.exe`
+- Debian/Ubuntu: download the `.deb`
+- Fedora/RPM distros: download the `.rpm`
+- Other Linux distros: download the portable `.tar.gz`
+
 ## Windows Usage
 
 Double-click `DisplaySnooze.exe`, or run it from PowerShell:
