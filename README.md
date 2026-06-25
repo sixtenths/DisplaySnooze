@@ -61,20 +61,20 @@ Examples:
 Run the portable Linux command:
 
 ```bash
-./linux/displaysnooze
+bash linux/displaysnooze
 ```
 
 Optional arguments match the Windows EXE:
 
 ```bash
-./linux/displaysnooze <guard-seconds> <interval-seconds>
+bash linux/displaysnooze <guard-seconds> <interval-seconds>
 ```
 
 Examples:
 
 ```bash
-./linux/displaysnooze 300
-./linux/displaysnooze 300 5
+bash linux/displaysnooze 300
+bash linux/displaysnooze 300 5
 ```
 
 Supported Linux backends:
