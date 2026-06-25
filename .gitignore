@@ -1,6 +1,5 @@
 /*.exe
 /*.cer
 /*.zip
-
-!/dist/DisplaySnooze.exe
-!/dist/DisplaySnoozeLocalCodeSigning.cer
+/build/
+/dist/
