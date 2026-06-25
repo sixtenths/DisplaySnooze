@@ -88,20 +88,20 @@ jobs:
           tag="v0.1.0"
           title="DisplaySnooze 0.1.0"
           notes="$(cat <<'NOTES'
-Download DisplaySnooze here if you just want the built files.
+          Download DisplaySnooze here if you just want the built files.
 
-Windows:
-- DisplaySnooze.exe
-- DisplaySnoozeLocalCodeSigning.cer
+          Windows:
+          - DisplaySnooze.exe
+          - DisplaySnoozeLocalCodeSigning.cer
 
-Linux:
-- portable tar.gz
-- Debian/Ubuntu .deb
-- Fedora/RPM .rpm
+          Linux:
+          - portable tar.gz
+          - Debian/Ubuntu .deb
+          - Fedora/RPM .rpm
 
-The Windows EXE is signed with a local self-signed certificate, so Windows may still show it as an unknown publisher unless you trust that certificate.
-NOTES
-)"
+          The Windows EXE is signed with a local self-signed certificate, so Windows may still show it as an unknown publisher unless you trust that certificate.
+          NOTES
+          )"
 
           if gh release view "$tag" >/dev/null 2>&1; then
             gh release edit "$tag" --title "$title" --notes "$notes"
