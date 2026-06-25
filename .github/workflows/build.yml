@@ -1,0 +1,58 @@
+name: Build DisplaySnooze
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  windows:
+    name: Windows EXE
+    runs-on: windows-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Build DisplaySnooze.exe
+        shell: pwsh
+        run: ./Build.ps1
+
+      - name: Sign with local self-signed certificate
+        shell: pwsh
+        run: ./Sign-DisplaySnooze.ps1
+
+      - name: Upload Windows EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: DisplaySnooze-windows
+          path: |
+            DisplaySnooze.exe
+            DisplaySnoozeLocalCodeSigning.cer
+
+  linux:
+    name: Linux Packages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install packaging tools
+        run: sudo apt-get update && sudo apt-get install -y rpm
+
+      - name: Check shell scripts
+        run: |
+          bash -n linux/displaysnooze
+          bash -n packaging/linux/build-linux-packages.sh
+
+      - name: Build Linux packages
+        run: |
+          chmod +x linux/displaysnooze packaging/linux/build-linux-packages.sh
+          VERSION=0.1.0 ARCH=all packaging/linux/build-linux-packages.sh
+
+      - name: Upload Linux packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: DisplaySnooze-linux
+          path: dist/linux/*
