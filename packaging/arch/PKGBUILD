@@ -1,10 +1,10 @@
 # Maintainer: Zac <zdksmith@yahoo.com>
 pkgname=displaysnooze
-pkgver=0.1.0
+pkgver=0.1.1
 pkgrel=1
 pkgdesc="Turn displays off while leaving the Linux session awake"
 arch=('any')
-url="https://github.com/InternalAardvark/DisplaySnooze"
+url="https://github.com/sixtenths/DisplaySnooze"
 license=('MIT')
 depends=('bash')
 optdepends=(
@@ -14,8 +14,8 @@ optdepends=(
   'kscreen: KDE Plasma Wayland support'
 )
 source=(
-  "displaysnooze::https://raw.githubusercontent.com/InternalAardvark/DisplaySnooze/main/linux/displaysnooze"
-  "LICENSE::https://raw.githubusercontent.com/InternalAardvark/DisplaySnooze/main/LICENSE"
+  "displaysnooze::https://raw.githubusercontent.com/sixtenths/DisplaySnooze/main/linux/displaysnooze"
+  "LICENSE::https://raw.githubusercontent.com/sixtenths/DisplaySnooze/main/LICENSE"
 )
 sha256sums=('SKIP' 'SKIP')
 

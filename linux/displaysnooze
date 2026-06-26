@@ -16,6 +16,7 @@ Defaults:
 
 This turns displays off while leaving the session and PC awake. It does not
 lock, log out, suspend, hibernate, install a service, or change startup config.
+Press Escape in the terminal to stop the guard early.
 USAGE
 }
 
@@ -102,6 +103,26 @@ turn_displays_off() {
     return 1
 }
 
+wait_for_next_interval_or_escape() {
+    local sleep_for="$1"
+    local elapsed=0
+    local key=''
+
+    while [ "$elapsed" -lt "$sleep_for" ]; do
+        if [ -t 0 ]; then
+            if IFS= read -rsn1 -t 1 key; then
+                [ "$key" = $'\033' ] && return 1
+            fi
+        else
+            sleep 1
+        fi
+
+        elapsed=$(( elapsed + 1 ))
+    done
+
+    return 0
+}
+
 main() {
     case "${1:-}" in
         -h|--help)
@@ -135,7 +156,7 @@ ERROR
 
         sleep_for="$interval_seconds"
         [ "$remaining" -lt "$sleep_for" ] && sleep_for="$remaining"
-        sleep "$sleep_for"
+        wait_for_next_interval_or_escape "$sleep_for" || break
     done
 }
 

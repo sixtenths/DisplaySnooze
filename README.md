@@ -27,6 +27,7 @@ By default, it:
 - Stops after 3 minutes.
 - Leaves the PC awake.
 - Leaves your apps running.
+- Lets you press `Esc` to stop the guard early.
 - Does not lock, log out, shut down, sleep, hibernate, or change power settings.
 - Does not install a service.
 - Does not add itself to startup.
@@ -34,7 +35,7 @@ By default, it:
 
 ## Download
 
-Grab the latest built files from the [GitHub Releases page](https://github.com/InternalAardvark/DisplaySnooze/releases/latest).
+Grab the latest built files from the [GitHub Releases page](https://github.com/sixtenths/DisplaySnooze/releases/latest).
 
 Lazy path:
 
@@ -71,6 +72,8 @@ Examples:
 `guard-seconds` defaults to `180` and is clamped between `15` and `1800`.
 `interval-seconds` defaults to `4` and is clamped between `1` and `60`.
 
+Press `Esc` while DisplaySnooze is guarding to cancel early. This is useful if you use a long guard window and want the screens to stay on again before the guard ends.
+
 ## Linux Usage
 
 Run the portable Linux command:
@@ -91,6 +94,8 @@ Examples:
 bash linux/displaysnooze 300
 bash linux/displaysnooze 300 5
 ```
+
+When running from a terminal, press `Esc` while DisplaySnooze is guarding to cancel early. `Ctrl+C` also stops the script.
 
 Supported Linux backends:
 

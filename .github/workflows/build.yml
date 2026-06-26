@@ -52,7 +52,7 @@ jobs:
       - name: Build Linux packages
         run: |
           chmod +x linux/displaysnooze packaging/linux/build-linux-packages.sh
-          VERSION=0.1.0 ARCH=all packaging/linux/build-linux-packages.sh
+          VERSION=0.1.1 ARCH=all packaging/linux/build-linux-packages.sh
 
       - name: Upload Linux packages
         uses: actions/upload-artifact@v4
@@ -88,19 +88,21 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          tag="v0.1.0"
-          title="DisplaySnooze 0.1.0"
+          tag="v0.1.1"
+          title="DisplaySnooze 0.1.1"
           notes="$(cat <<'NOTES'
           Download DisplaySnooze here if you just want the built files.
 
           Windows:
           - DisplaySnooze.exe
           - DisplaySnoozeLocalCodeSigning.cer
+          - Press Escape while DisplaySnooze is guarding to cancel early.
 
           Linux:
           - portable tar.gz
           - Debian/Ubuntu .deb
           - Fedora/RPM .rpm
+          - Press Escape in the terminal while DisplaySnooze is guarding to cancel early.
 
           The Windows EXE is signed with a local self-signed certificate, so Windows may still show it as an unknown publisher unless you trust that certificate.
           NOTES
