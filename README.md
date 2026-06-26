@@ -1,5 +1,9 @@
 # DisplaySnooze
 
+<p align="center">
+  <img src="assets/logo-256.png" alt="DisplaySnooze logo" width="128">
+</p>
+
 DisplaySnooze is a tiny open-source utility that turns your displays off while leaving the PC awake and your current session alone.
 
 ## Why
