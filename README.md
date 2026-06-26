@@ -43,6 +43,10 @@ Lazy path:
 - Fedora/RPM distros: download the `.rpm`
 - Other Linux distros: download the portable `.tar.gz`
 
+## Questions
+
+The [DisplaySnooze wiki](https://github.com/sixtenths/DisplaySnooze/wiki) has usage notes, downloads, Linux details, and troubleshooting for screens that wake back up.
+
 ## Windows Usage
 
 Double-click `DisplaySnooze.exe`, or run it from PowerShell:
