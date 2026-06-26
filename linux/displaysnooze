@@ -11,7 +11,7 @@ Usage:
   displaysnooze [guard-seconds] [interval-seconds]
 
 Defaults:
-  guard-seconds    180  (clamped 15..1800)
+  guard-seconds    600  (clamped 15..1800)
   interval-seconds 4    (clamped 1..60)
 
 This turns displays off while leaving the session and PC awake. It does not
@@ -132,7 +132,7 @@ main() {
     esac
 
     local guard_seconds interval_seconds stop_at now remaining sleep_for
-    guard_seconds="$(read_int_arg "${1:-}" 180 15 1800)"
+    guard_seconds="$(read_int_arg "${1:-}" 600 15 1800)"
     interval_seconds="$(read_int_arg "${2:-}" 4 1 60)"
     stop_at=$(( $(date +%s) + guard_seconds ))
 

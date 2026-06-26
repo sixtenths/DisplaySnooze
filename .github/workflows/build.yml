@@ -52,7 +52,7 @@ jobs:
       - name: Build Linux packages
         run: |
           chmod +x linux/displaysnooze packaging/linux/build-linux-packages.sh
-          VERSION=0.1.1 ARCH=all packaging/linux/build-linux-packages.sh
+          VERSION=0.1.2 ARCH=all packaging/linux/build-linux-packages.sh
 
       - name: Upload Linux packages
         uses: actions/upload-artifact@v4
@@ -88,20 +88,22 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          tag="v0.1.1"
-          title="DisplaySnooze 0.1.1"
+          tag="v0.1.2"
+          title="DisplaySnooze 0.1.2"
           notes="$(cat <<'NOTES'
           Download DisplaySnooze here if you just want the built files.
 
           Windows:
           - DisplaySnooze.exe
           - DisplaySnoozeLocalCodeSigning.cer
+          - Default guard is now 10 minutes to cover delayed wake events like the one measured during testing.
           - Press Escape while DisplaySnooze is guarding to cancel early.
 
           Linux:
           - portable tar.gz
           - Debian/Ubuntu .deb
           - Fedora/RPM .rpm
+          - Default guard is now 10 minutes.
           - Press Escape in the terminal while DisplaySnooze is guarding to cancel early.
 
           The Windows EXE is signed with a local self-signed certificate, so Windows may still show it as an unknown publisher unless you trust that certificate.

@@ -24,7 +24,7 @@ By default, it:
 
 - Turns the displays off immediately.
 - Repeats the monitor-off command every 4 seconds.
-- Stops after 3 minutes.
+- Stops after 10 minutes.
 - Leaves the PC awake.
 - Leaves your apps running.
 - Lets you press `Esc` to stop the guard early.
@@ -69,7 +69,7 @@ Examples:
 .\DisplaySnooze.exe 300 5
 ```
 
-`guard-seconds` defaults to `180` and is clamped between `15` and `1800`.
+`guard-seconds` defaults to `600` and is clamped between `15` and `1800`.
 `interval-seconds` defaults to `4` and is clamped between `1` and `60`.
 
 Press `Esc` while DisplaySnooze is guarding to cancel early. This is useful if you use a long guard window and want the screens to stay on again before the guard ends.
@@ -112,7 +112,13 @@ Linux support depends on the desktop/compositor, not just the distro. Arch, Debi
 .\Build.ps1
 ```
 
-The build script uses the .NET Framework C# compiler included with Windows.
+The build script uses the .NET Framework C# compiler included with Windows and embeds `assets/DisplaySnooze.ico`.
+
+To regenerate the Windows icon:
+
+```powershell
+.\tools\New-DisplaySnoozeIcon.ps1
+```
 
 ## Linux Package Build
 

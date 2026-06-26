@@ -1,6 +1,6 @@
 # Maintainer: Zac <zdksmith@yahoo.com>
 pkgname=displaysnooze
-pkgver=0.1.1
+pkgver=0.1.2
 pkgrel=1
 pkgdesc="Turn displays off while leaving the Linux session awake"
 arch=('any')

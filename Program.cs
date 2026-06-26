@@ -31,7 +31,7 @@ internal static class Program
 
     private static int Main(string[] args)
     {
-        int guardSeconds = ReadIntArg(args, 0, 180, 15, 1800);
+        int guardSeconds = ReadIntArg(args, 0, 600, 15, 1800);
         int intervalSeconds = ReadIntArg(args, 1, 4, 1, 60);
         DateTime stopAt = DateTime.UtcNow.AddSeconds(guardSeconds);
 
