@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Usage and troubleshooting
+    url: https://github.com/sixtenths/DisplaySnooze/wiki
+    about: Check the wiki for setup help and display wake-up troubleshooting.
+  - name: Security vulnerability
+    url: https://github.com/sixtenths/DisplaySnooze/security
+    about: Report suspected vulnerabilities privately instead of opening a public issue.

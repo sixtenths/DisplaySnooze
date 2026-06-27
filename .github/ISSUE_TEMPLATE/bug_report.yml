@@ -1,0 +1,70 @@
+name: Bug report
+description: Report a reproducible problem with DisplaySnooze
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for taking the time to report a problem.
+  - type: input
+    id: version
+    attributes:
+      label: DisplaySnooze version
+      description: For example, v0.1.2.
+      placeholder: v0.1.2
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - Windows
+        - Linux - X11
+        - Linux - Wayland
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Operating system and desktop environment
+      description: Include the Windows version or Linux distribution, desktop environment, and compositor.
+      placeholder: Windows 11 24H2, or Fedora 42 with KDE Plasma Wayland
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Describe what you observed and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Run DisplaySnooze...
+        2. Wait...
+        3. Observe...
+    validations:
+      required: true
+  - type: input
+    id: command
+    attributes:
+      label: Command or arguments used
+      placeholder: DisplaySnooze.exe 600 4
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add relevant logs, screenshots, display hardware, or troubleshooting results. Remove sensitive information first.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues for this problem.
+          required: true
+        - label: I am using an unmodified DisplaySnooze release or source checkout.
+          required: true
