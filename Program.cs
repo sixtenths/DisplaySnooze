@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -8,13 +9,43 @@ internal static class Program
     private const int VK_ESCAPE = 0x1b;
     private const int WM_SYSCOMMAND = 0x0112;
     private const int SC_MONITORPOWER = 0xf170;
+    private const byte VCP_POWER_MODE = 0xd6;
+    private const uint VCP_POWER_OFF_SOFT = 0x04;
     private static readonly IntPtr MONITOR_OFF = new IntPtr(2);
+
+    private sealed class Options
+    {
+        public int GuardSeconds = 600;
+        public int IntervalSeconds = 4;
+        public bool UseDdcci;
+    }
 
     [Flags]
     private enum SendMessageTimeoutFlags : uint
     {
         SMTO_ABORTIFHUNG = 0x0002
     }
+
+#pragma warning disable 0649
+    private struct Rect
+    {
+        public int Left;
+        public int Top;
+        public int Right;
+        public int Bottom;
+    }
+#pragma warning restore 0649
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    private struct PhysicalMonitor
+    {
+        public IntPtr Handle;
+
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+        public string Description;
+    }
+
+    private delegate bool MonitorEnumProc(IntPtr monitor, IntPtr hdc, ref Rect rect, IntPtr data);
 
     [DllImport("user32.dll", SetLastError = true)]
     private static extern IntPtr SendMessageTimeout(
@@ -29,15 +60,32 @@ internal static class Program
     [DllImport("user32.dll")]
     private static extern short GetAsyncKeyState(int vKey);
 
+    [DllImport("user32.dll")]
+    private static extern bool EnumDisplayMonitors(IntPtr hdc, IntPtr clipRect, MonitorEnumProc callback, IntPtr data);
+
+    [DllImport("dxva2.dll", SetLastError = true)]
+    private static extern bool GetNumberOfPhysicalMonitorsFromHMONITOR(IntPtr monitor, out uint physicalMonitorCount);
+
+    [DllImport("dxva2.dll", SetLastError = true)]
+    private static extern bool GetPhysicalMonitorsFromHMONITOR(
+        IntPtr monitor,
+        uint physicalMonitorCount,
+        [Out] PhysicalMonitor[] physicalMonitors);
+
+    [DllImport("dxva2.dll", SetLastError = true)]
+    private static extern bool DestroyPhysicalMonitors(uint physicalMonitorCount, PhysicalMonitor[] physicalMonitors);
+
+    [DllImport("dxva2.dll", SetLastError = true)]
+    private static extern bool SetVCPFeature(IntPtr physicalMonitor, byte vcpCode, uint newValue);
+
     private static int Main(string[] args)
     {
-        int guardSeconds = ReadIntArg(args, 0, 600, 15, 1800);
-        int intervalSeconds = ReadIntArg(args, 1, 4, 1, 60);
-        DateTime stopAt = DateTime.UtcNow.AddSeconds(guardSeconds);
+        Options options = ParseOptions(args);
+        DateTime stopAt = DateTime.UtcNow.AddSeconds(options.GuardSeconds);
 
         do
         {
-            TurnMonitorsOff();
+            TurnMonitorsOff(options.UseDdcci);
 
             TimeSpan remaining = stopAt - DateTime.UtcNow;
             if (remaining <= TimeSpan.Zero)
@@ -45,7 +93,7 @@ internal static class Program
                 break;
             }
 
-            int sleepMs = (int)Math.Min(TimeSpan.FromSeconds(intervalSeconds).TotalMilliseconds, remaining.TotalMilliseconds);
+            int sleepMs = (int)Math.Min(TimeSpan.FromSeconds(options.IntervalSeconds).TotalMilliseconds, remaining.TotalMilliseconds);
             if (WaitForNextIntervalOrEscape(Math.Max(250, sleepMs)))
             {
                 break;
@@ -56,14 +104,47 @@ internal static class Program
         return 0;
     }
 
-    private static int ReadIntArg(string[] args, int index, int defaultValue, int min, int max)
+    private static Options ParseOptions(string[] args)
     {
-        int value;
-        if (args.Length <= index || !int.TryParse(args[index], out value))
+        Options options = new Options();
+        List<int> numbers = new List<int>();
+
+        foreach (string arg in args)
         {
-            return defaultValue;
+            if (IsDdcciArg(arg))
+            {
+                options.UseDdcci = true;
+                continue;
+            }
+
+            int value;
+            if (int.TryParse(arg, out value))
+            {
+                numbers.Add(value);
+            }
         }
 
+        if (numbers.Count > 0)
+        {
+            options.GuardSeconds = Clamp(numbers[0], 15, 1800);
+        }
+
+        if (numbers.Count > 1)
+        {
+            options.IntervalSeconds = Clamp(numbers[1], 1, 60);
+        }
+
+        return options;
+    }
+
+    private static bool IsDdcciArg(string arg)
+    {
+        return string.Equals(arg, "--ddcci", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(arg, "/ddcci", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static int Clamp(int value, int min, int max)
+    {
         if (value < min)
         {
             return min;
@@ -77,7 +158,7 @@ internal static class Program
         return value;
     }
 
-    private static void TurnMonitorsOff()
+    private static void TurnMonitorsOff(bool useDdcci)
     {
         IntPtr unused;
         SendMessageTimeout(
@@ -88,6 +169,55 @@ internal static class Program
             SendMessageTimeoutFlags.SMTO_ABORTIFHUNG,
             1000,
             out unused);
+
+        if (useDdcci)
+        {
+            TurnPhysicalMonitorsOff();
+        }
+    }
+
+    private static void TurnPhysicalMonitorsOff()
+    {
+        try
+        {
+            EnumDisplayMonitors(IntPtr.Zero, IntPtr.Zero, SetPhysicalMonitorsLowPower, IntPtr.Zero);
+        }
+        catch
+        {
+            // DDC/CI support varies by monitor and driver. Keep the normal Windows path best-effort.
+        }
+    }
+
+    private static bool SetPhysicalMonitorsLowPower(IntPtr monitor, IntPtr hdc, ref Rect rect, IntPtr data)
+    {
+        uint physicalMonitorCount;
+        if (!GetNumberOfPhysicalMonitorsFromHMONITOR(monitor, out physicalMonitorCount) || physicalMonitorCount == 0)
+        {
+            return true;
+        }
+
+        PhysicalMonitor[] physicalMonitors = new PhysicalMonitor[physicalMonitorCount];
+        if (!GetPhysicalMonitorsFromHMONITOR(monitor, physicalMonitorCount, physicalMonitors))
+        {
+            return true;
+        }
+
+        try
+        {
+            for (int i = 0; i < physicalMonitors.Length; i++)
+            {
+                if (physicalMonitors[i].Handle != IntPtr.Zero)
+                {
+                    SetVCPFeature(physicalMonitors[i].Handle, VCP_POWER_MODE, VCP_POWER_OFF_SOFT);
+                }
+            }
+        }
+        finally
+        {
+            DestroyPhysicalMonitors(physicalMonitorCount, physicalMonitors);
+        }
+
+        return true;
     }
 
     private static bool WaitForNextIntervalOrEscape(int sleepMs)

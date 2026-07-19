@@ -71,12 +71,16 @@ Examples:
 ```powershell
 .\DisplaySnooze.exe 300
 .\DisplaySnooze.exe 300 5
+.\DisplaySnooze.exe --ddcci
+.\DisplaySnooze.exe 600 4 --ddcci
 ```
 
 `guard-seconds` defaults to `600` and is clamped between `15` and `1800`.
 `interval-seconds` defaults to `4` and is clamped between `1` and `60`.
 
 Press `Esc` while DisplaySnooze is guarding to cancel early. This is useful if you use a long guard window and want the screens to stay on again before the guard ends.
+
+If a Windows or GPU driver update leaves one monitor backlit after the normal monitor-off command, try `--ddcci`. It keeps the standard Windows behavior and also asks physical monitors to enter low-power mode through DDC/CI. DDC/CI support depends on the monitor, cable, and display driver, so this option is best treated as a troubleshooting mode.
 
 ## Linux Usage
 
