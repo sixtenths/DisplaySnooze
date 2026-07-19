@@ -18,7 +18,7 @@ jobs:
       - name: Check out source
         uses: actions/checkout@v4
 
-      - name: Build DisplaySnooze.exe
+      - name: Build Windows executables
         shell: powershell
         run: ./Build.ps1
 
@@ -32,6 +32,7 @@ jobs:
           name: DisplaySnooze-windows
           path: |
             DisplaySnooze.exe
+            DisplaySnoozeDdcci.exe
             DisplaySnoozeLocalCodeSigning.cer
 
   linux:
@@ -95,9 +96,11 @@ jobs:
 
           Windows:
           - DisplaySnooze.exe
+          - DisplaySnoozeDdcci.exe
           - DisplaySnoozeLocalCodeSigning.cer
           - Default guard is now 10 minutes to cover delayed wake events like the one measured during testing.
           - Press Escape while DisplaySnooze is guarding to cancel early.
+          - DisplaySnoozeDdcci.exe is a backup build that also asks physical monitors to enter low-power mode through DDC/CI.
 
           Linux:
           - portable tar.gz

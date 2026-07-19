@@ -1,12 +1,17 @@
 $ErrorActionPreference = 'Stop'
 
 $projectDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$exe = Join-Path $projectDir 'DisplaySnooze.exe'
+$exes = @(
+    (Join-Path $projectDir 'DisplaySnooze.exe'),
+    (Join-Path $projectDir 'DisplaySnoozeDdcci.exe')
+)
 $certPath = Join-Path $projectDir 'DisplaySnoozeLocalCodeSigning.cer'
 $subject = 'CN=Zac DisplaySnooze Local Code Signing'
 
-if (-not (Test-Path -LiteralPath $exe)) {
-    throw "Build DisplaySnooze.exe first: $exe"
+foreach ($exe in $exes) {
+    if (-not (Test-Path -LiteralPath $exe)) {
+        throw "Build DisplaySnooze first: $exe"
+    }
 }
 
 $cert = Get-ChildItem Cert:\CurrentUser\My -CodeSigningCert |
@@ -25,8 +30,11 @@ if (-not $cert) {
         -NotAfter (Get-Date).AddYears(5)
 }
 
-Set-AuthenticodeSignature -FilePath $exe -Certificate $cert -HashAlgorithm SHA256
+foreach ($exe in $exes) {
+    Set-AuthenticodeSignature -FilePath $exe -Certificate $cert -HashAlgorithm SHA256
+    Write-Host "Signed $exe"
+}
+
 Export-Certificate -Cert $cert -FilePath $certPath | Out-Null
 
-Write-Host "Signed $exe"
 Write-Host "Exported $certPath"

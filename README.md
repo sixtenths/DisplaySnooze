@@ -44,6 +44,7 @@ Grab the latest built files from the [GitHub Releases page](https://github.com/s
 Lazy path:
 
 - Windows: download `DisplaySnooze.exe`
+- Windows DDC/CI backup: download `DisplaySnoozeDdcci.exe`
 - Debian/Ubuntu: download the `.deb`
 - Fedora/RPM distros: download the `.rpm`
 - Other Linux distros: download the portable `.tar.gz`
@@ -71,8 +72,6 @@ Examples:
 ```powershell
 .\DisplaySnooze.exe 300
 .\DisplaySnooze.exe 300 5
-.\DisplaySnooze.exe --ddcci
-.\DisplaySnooze.exe 600 4 --ddcci
 ```
 
 `guard-seconds` defaults to `600` and is clamped between `15` and `1800`.
@@ -80,7 +79,12 @@ Examples:
 
 Press `Esc` while DisplaySnooze is guarding to cancel early. This is useful if you use a long guard window and want the screens to stay on again before the guard ends.
 
-If a Windows or GPU driver update leaves one monitor backlit after the normal monitor-off command, try `--ddcci`. It keeps the standard Windows behavior and also asks physical monitors to enter low-power mode through DDC/CI. DDC/CI support depends on the monitor, cable, and display driver, so this option is best treated as a troubleshooting mode.
+If a Windows or GPU driver update leaves one monitor backlit after the normal monitor-off command, try `DisplaySnoozeDdcci.exe` as a backup. It keeps the standard Windows behavior and also asks physical monitors to enter low-power mode through DDC/CI. DDC/CI support depends on the monitor, cable, and display driver, so this backup may behave differently across setups.
+
+```powershell
+.\DisplaySnoozeDdcci.exe
+.\DisplaySnoozeDdcci.exe 300 5
+```
 
 ## Linux Usage
 
@@ -121,6 +125,10 @@ Linux support depends on the desktop/compositor, not just the distro. Arch, Debi
 ```
 
 The build script uses the .NET Framework C# compiler included with Windows and embeds `assets/DisplaySnooze.ico`.
+It builds both Windows executables:
+
+- `DisplaySnooze.exe`
+- `DisplaySnoozeDdcci.exe`
 
 To regenerate the Windows icon:
 
